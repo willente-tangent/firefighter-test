@@ -5,12 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>忠县消防救援大队政府专职消防员招录心理测试系统</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --primary-color: #e63946;
             --primary-dark: #c41e3a;
@@ -21,6 +16,8 @@
             --success-color: #06d6a0;
             --warning-color: #ffd166;
             --danger-color: #ef476f;
+            --mbti-left: #457b9d;
+            --mbti-right: #e63946;
             --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
@@ -49,659 +46,89 @@
             position: relative;
         }
 
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #fff, transparent, #fff);
-        }
+        .header-title { font-size: 28px; margin-bottom: 12px; font-weight: 700; letter-spacing: 1px; }
+        .header-subtitle { font-size: 15px; opacity: 0.95; font-weight: 400; }
+        .content { padding: 40px 30px; }
+
+        .welcome-screen, .test-screen, .result-screen { display: none; animation: fadeIn 0.5s ease-in; }
+        .welcome-screen.active, .test-screen.active, .result-screen.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 信息卡片与表单 */
+        .info-card { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; padding: 30px; margin-bottom: 30px; border: 2px solid var(--border-color); }
+        .info-card-title { color: var(--primary-color); font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .info-list { list-style: none; padding: 0; }
+        .info-list li { padding: 8px 0 8px 30px; color: var(--text-dark); position: relative; font-size: 15px; }
+        .info-list li::before { content: '✓'; position: absolute; left: 0; color: var(--primary-color); font-weight: bold; font-size: 18px; }
+        
+        .form-section-title { font-size: 20px; color: var(--text-dark); margin-bottom: 20px; font-weight: 700; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-label { font-size: 15px; color: var(--text-dark); margin-bottom: 8px; font-weight: 600; }
+        .form-input { padding: 14px 16px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 16px; transition: all 0.3s; }
+        .form-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.1); }
+        
+        .btn { background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); color: white; border: none; padding: 16px 40px; font-size: 17px; border-radius: 12px; cursor: pointer; transition: all 0.3s; font-weight: 700; width: 100%; max-width: 400px; display: block; margin: 0 auto; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(230, 57, 70, 0.4); }
+        .btn-secondary { background: linear-gradient(135deg, #6c757d 0%, #495057 100%); flex: 1; }
+        .btn-primary { flex: 1; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* 测试页面 */
+        .timer-bar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: rgba(255, 255, 255, 0.95); box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
+        .timer { font-size: 18px; font-weight: 700; color: var(--text-dark); }
+        .timer-text { color: var(--primary-color); font-size: 22px; margin-left: 10px; }
+        
+        .test-container { margin-top: 50px; }
+        .progress-info { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: var(--text-gray); }
+        .progress-bar { height: 10px; background: #e9ecef; border-radius: 5px; overflow: hidden; margin-bottom: 30px;}
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary-color), var(--primary-dark)); width: 0%; transition: width 0.4s; }
+
+        .question-card { background: #fff; border: 2px solid var(--border-color); border-radius: 16px; padding: 35px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .question-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #f1f3f5; }
+        .question-number { background: var(--primary-color); color: white; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 15px; }
+        .dimension-badge { background: #e7f5ff; color: #1864ab; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+        .mbti-badge { background: #f3e8ff; color: #7e22ce; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+        .redline-badge { background: #ffe3e3; color: #c92a2a; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+        
+        .question-text { color: var(--text-dark); font-size: 19px; line-height: 1.7; margin-bottom: 25px; font-weight: 500; }
+        .math-question { font-size: 28px; font-weight: 700; color: #1971c2; text-align: center; padding: 20px; background: #f8f9fa; border-radius: 12px; margin-bottom: 25px; letter-spacing: 2px;}
+        
+        .options-container { display: grid; gap: 12px; }
+        .option { background: #f8f9fa; border: 2px solid var(--border-color); padding: 18px 20px; border-radius: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 15px; }
+        .option:hover { border-color: var(--primary-color); background: #fff5f5; }
+        .option.selected { border-color: var(--primary-color); background: #ffe5e5; box-shadow: 0 4px 10px rgba(230,57,70,0.1); }
+        .option-radio { width: 20px; height: 20px; accent-color: var(--primary-color); }
+        .option-label { flex: 1; font-size: 16px; color: var(--text-dark); cursor: pointer; }
+        .navigation { display: flex; gap: 15px; margin-top: 20px; }
+
+        /* 结果页面 */
+        .result-header { text-align: center; margin-bottom: 30px; }
+        .result-title { font-size: 28px; color: var(--text-dark); font-weight: 700; }
+        
+        .warning-box { background: #fff3cd; border: 2px solid #ffc107; color: #856404; padding: 20px; border-radius: 12px; margin-bottom: 25px; font-size: 15px; line-height: 1.6; }
+        .danger-box { background: #ffe3e3; border: 2px solid #fa5252; color: #c92a2a; padding: 20px; border-radius: 12px; margin-bottom: 25px; font-size: 15px; line-height: 1.6; }
+        
+        .dimension-card { background: white; border: 2px solid var(--border-color); border-radius: 12px; padding: 25px; margin-bottom: 20px; }
+        .dimension-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .dimension-name { font-size: 18px; font-weight: 700; color: var(--text-dark); }
+        .dimension-score { font-size: 20px; font-weight: 800; color: var(--primary-color); }
+
+        /* MBTI 可视化图表 */
+        .mbti-chart { margin-top: 20px; }
+        .mbti-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+        .mbti-label { width: 60px; font-weight: 700; font-size: 14px; color: var(--text-dark); text-align: center; }
+        .mbti-bar-container { flex: 1; height: 24px; background: #e9ecef; border-radius: 12px; margin: 0 15px; display: flex; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
+        .mbti-bar-left { height: 100%; background: var(--mbti-left); display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; color: white; font-size: 12px; font-weight: bold; transition: width 1s ease; }
+        .mbti-bar-right { height: 100%; background: var(--mbti-right); display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-size: 12px; font-weight: bold; transition: width 1s ease; }
+        
+        .mbti-desc { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 14px; color: #495057; border-left: 4px solid var(--primary-color); }
 
-        .header-title {
-            font-size: 28px;
-            margin-bottom: 12px;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-
-        .header-subtitle {
-            font-size: 15px;
-            opacity: 0.95;
-            font-weight: 400;
-        }
-
-        .content {
-            padding: 40px 30px;
-        }
-
-        /* 欢迎页面样式 */
-        .welcome-screen, .test-screen, .result-screen {
-            display: none;
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        .welcome-screen.active, .test-screen.active, .result-screen.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .info-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 2px solid var(--border-color);
-        }
-
-        .info-card-title {
-            color: var(--primary-color);
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .info-card-title::before {
-            content: '📋';
-            font-size: 24px;
-        }
-
-        .info-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .info-list li {
-            padding: 12px 0;
-            padding-left: 30px;
-            color: var(--text-dark);
-            position: relative;
-            line-height: 1.8;
-            font-size: 15px;
-        }
-
-        .info-list li::before {
-            content: '✓';
-            position: absolute;
-            left: 0;
-            color: var(--primary-color);
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        .form-section {
-            margin-bottom: 30px;
-        }
-
-        .form-section-title {
-            font-size: 20px;
-            color: var(--text-dark);
-            margin-bottom: 20px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .form-section-title::before {
-            content: '👤';
-            font-size: 24px;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-label {
-            font-size: 15px;
-            color: var(--text-dark);
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .form-label .required {
-            color: var(--primary-color);
-            margin-left: 4px;
-        }
-
-        .form-input {
-            padding: 14px 16px;
-            border: 2px solid var(--border-color);
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: #fff;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.1);
-        }
-
-        .btn {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-            color: white;
-            border: none;
-            padding: 16px 40px;
-            font-size: 17px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 700;
-            width: 100%;
-            max-width: 400px;
-            display: block;
-            margin: 0 auto;
-            letter-spacing: 0.5px;
-        }
-
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(230, 57, 70, 0.4);
-        }
-
-        .btn:active {
-            transform: translateY(-1px);
-        }
-
-        /* 测试页面样式 */
-        .timer-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.98);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-        }
-
-        .timer {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text-dark);
-        }
-
-        .timer-icon {
-            font-size: 24px;
-        }
-
-        .timer-text {
-            color: var(--primary-color);
-            font-size: 22px;
-        }
-
-        .test-container {
-            margin-top: 80px;
-        }
-
-        .progress-section {
-            margin-bottom: 30px;
-        }
-
-        .progress-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .progress-label {
-            font-size: 14px;
-            color: var(--text-gray);
-        }
-
-        .progress-value {
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-
-        .progress-bar {
-            height: 10px;
-            background: #e9ecef;
-            border-radius: 5px;
-            overflow: hidden;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-            width: 0%;
-            transition: width 0.4s ease;
-            position: relative;
-        }
-
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            animation: shimmer 2s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        .question-card {
-            background: #ffffff;
-            border: 2px solid var(--border-color);
-            border-radius: 16px;
-            padding: 35px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        .question-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #f1f3f5;
-            flex-wrap: wrap;
-        }
-
-        .question-number {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 16px;
-            min-width: 120px;
-            text-align: center;
-        }
-
-        .dimension-badge {
-            background: #e7f5ff;
-            color: #1864ab;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .math-badge {
-            background: #d0ebff;
-            color: #1971c2;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .question-text {
-            color: var(--text-dark);
-            font-size: 19px;
-            line-height: 1.7;
-            margin-bottom: 25px;
-            font-weight: 500;
-        }
-
-        .math-question {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1971c2;
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            margin-bottom: 25px;
-        }
-
-        .options-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-        }
-
-        .option {
-            background: #f8f9fa;
-            border: 2px solid var(--border-color);
-            padding: 18px 20px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            position: relative;
-        }
-
-        .option:hover {
-            border-color: var(--primary-color);
-            background: #fff5f5;
-            transform: translateX(5px);
-        }
-
-        .option.selected {
-            border-color: var(--primary-color);
-            background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
-            box-shadow: 0 4px 15px rgba(230, 57, 70, 0.2);
-        }
-
-        .option-radio {
-            width: 22px;
-            height: 22px;
-            cursor: pointer;
-            accent-color: var(--primary-color);
-        }
-
-        .option-label {
-            cursor: pointer;
-            flex: 1;
-            font-size: 16px;
-            color: var(--text-dark);
-            font-weight: 500;
-        }
-
-        .navigation {
-            display: flex;
-            gap: 15px;
-            margin-top: 35px;
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-            flex: 1;
-        }
-
-        .btn-secondary:hover {
-            box-shadow: 0 10px 30px rgba(108, 117, 125, 0.4);
-        }
-
-        .btn-primary {
-            flex: 1;
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        /* 结果页面样式 */
-        .result-header {
-            text-align: center;
-            margin-bottom: 35px;
-        }
-
-        .result-title {
-            font-size: 28px;
-            color: var(--text-dark);
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .result-subtitle {
-            font-size: 15px;
-            color: var(--text-gray);
-        }
-
-        .score-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 16px;
-            padding: 40px;
-            margin-bottom: 35px;
-            text-align: center;
-            border: 2px solid var(--border-color);
-        }
-
-        .score-display {
-            font-size: 80px;
-            font-weight: 800;
-            margin: 20px 0;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .score-suffix {
-            font-size: 40px;
-        }
-
-        .result-level {
-            font-size: 26px;
-            font-weight: 700;
-            margin-bottom: 15px;
-        }
-
-        .result-description {
-            font-size: 16px;
-            color: var(--text-gray);
-            line-height: 1.8;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .dimensions-section {
-            margin-top: 40px;
-        }
-
-        .section-title {
-            font-size: 22px;
-            color: var(--text-dark);
-            margin-bottom: 25px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .section-title::before {
-            content: '📊';
-            font-size: 28px;
-        }
-
-        .dimension-card {
-            background: white;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .dimension-card:hover {
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-            transform: translateY(-2px);
-        }
-
-        .dimension-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .dimension-name {
-            font-size: 17px;
-            font-weight: 700;
-            color: var(--text-dark);
-        }
-
-        .dimension-score {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--primary-color);
-        }
-
-        .dimension-bar-container {
-            height: 28px;
-            background: #e9ecef;
-            border-radius: 14px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .dimension-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-            border-radius: 14px;
-            transition: width 1s ease;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 12px;
-            font-size: 13px;
-            color: white;
-            font-weight: 700;
-        }
-
-        .action-buttons {
-            display: flex;
-            justify-content: center;
-            margin-top: 35px;
-        }
-
-        .action-buttons .btn {
-            max-width: 400px;
-        }
-
-        .info-notice {
-            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-            border: 2px solid #ffc107;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 30px;
-            text-align: center;
-        }
-
-        .info-notice p {
-            margin: 8px 0;
-            color: #856404;
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .warning-box {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            color: #856404;
-            padding: 16px 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            text-align: center;
-            font-weight: 600;
-            font-size: 15px;
-        }
-
-        /* 响应式设计 */
         @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-
-            .header {
-                padding: 30px 20px;
-            }
-
-            .header-title {
-                font-size: 22px;
-            }
-
-            .header-subtitle {
-                font-size: 13px;
-            }
-
-            .content {
-                padding: 25px 20px;
-            }
-
-            .timer-bar {
-                height: 50px;
-            }
-
-            .timer {
-                font-size: 14px;
-            }
-
-            .timer-text {
-                font-size: 16px;
-            }
-
-            .test-container {
-                margin-top: 70px;
-            }
-
-            .question-card {
-                padding: 25px 20px;
-            }
-
-            .question-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-
-            .question-text {
-                font-size: 17px;
-            }
-
-            .math-question {
-                font-size: 20px;
-            }
-
-            .score-display {
-                font-size: 60px;
-            }
-
-            .score-suffix {
-                font-size: 30px;
-            }
-
-            .result-level {
-                font-size: 22px;
-            }
-
-            .navigation {
-                flex-direction: column;
-            }
-
-            .btn-secondary, .btn-primary {
-                width: 100%;
-            }
-        }
-
-        @media (min-width: 769px) {
-            .form-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .form-grid .full-width {
-                grid-column: 1 / -1;
-            }
+            .form-grid { grid-template-columns: 1fr; }
+            .navigation { flex-direction: column; }
+            .mbti-label { width: 50px; font-size: 12px; }
         }
     </style>
 </head>
@@ -709,219 +136,232 @@
     <div class="container">
         <div class="header">
             <div class="header-title">忠县消防救援大队政府专职消防员招录</div>
-            <div class="header-subtitle">心理健康与基础能力测试系统 v3.0</div>
+            <div class="header-subtitle">心理健康与职业性格测试系统 v4.0 (专业版)</div>
         </div>
 
         <div class="content">
-            <!-- 欢迎页面 -->
             <div class="welcome-screen active" id="welcomeScreen">
                 <div class="info-card">
                     <div class="info-card-title">测试须知</div>
                     <ul class="info-list">
-                        <li><strong>测试题量：</strong>共70题（60道心理题 + 10道算数题）</li>
-                        <li><strong>测试时长：</strong>限时30分钟，请合理安排答题时间</li>
-                        <li><strong>测试维度：</strong>心理素质6个维度 + 基础算数能力</li>
-                        <li><strong>答题环境：</strong>请在安静的环境下独立完成，确保测试准确性</li>
-                        <li><strong>作答要求：</strong>每题仅可选择一个答案，请根据真实感受作答</li>
-                        <li><strong>注意事项：</strong>测试过程中请勿刷新页面或关闭浏览器</li>
-                        <li><strong>设备支持：</strong>支持手机、平板、电脑等多种设备</li>
+                        <li><strong>专业测评：</strong>本次包含心理排查、职业性格(MBTI)、纪律意识及基础抗压算数。</li>
+                        <li><strong>测试题量：</strong>系统将从题库中随机抽取 70 题。</li>
+                        <li><strong>时间限制：</strong>30分钟。请凭借第一直觉作答，切勿过度思考。</li>
+                        <li><strong>防作弊机制：</strong>系统内置掩饰性（测谎）维度，如刻意选择“完美答案”将导致成绩无效。</li>
+                        <li><strong>数据用途：</strong>测试结果将作为大队招录及后续人员量化考核的重要数据支撑。</li>
                     </ul>
                 </div>
 
-                <div class="form-section">
-                    <div class="form-section-title">考生信息登记</div>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">姓名<span class="required">*</span></label>
-                            <input type="text" class="form-input" id="candidateName" placeholder="请输入真实姓名" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">性别<span class="required">*</span></label>
-                            <select class="form-input" id="candidateGender" required>
-                                <option value="">请选择</option>
-                                <option value="男">男</option>
-                                <option value="女">女</option>
-                            </select>
-                        </div>
-                        <div class="form-group full-width">
-                            <label class="form-label">身份证号<span class="required">*</span></label>
-                            <input type="text" class="form-input" id="candidateId" placeholder="请输入18位身份证号" maxlength="18" required>
-                        </div>
-                        <div class="form-group full-width">
-                            <label class="form-label">联系电话<span class="required">*</span></label>
-                            <input type="tel" class="form-input" id="candidatePhone" placeholder="请输入11位手机号码" maxlength="11" required>
-                        </div>
+                <div class="form-section-title">考生信息登记</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">姓名 *</label>
+                        <input type="text" class="form-input" id="candidateName" placeholder="请输入真实姓名" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">性别 *</label>
+                        <select class="form-input" id="candidateGender" required>
+                            <option value="男">男</option>
+                            <option value="女">女</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">身份证号 *</label>
+                        <input type="text" class="form-input" id="candidateId" placeholder="18位身份证号" maxlength="18" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">联系电话 *</label>
+                        <input type="tel" class="form-input" id="candidatePhone" placeholder="11位手机号码" maxlength="11" required>
                     </div>
                 </div>
-
-                <button class="btn" onclick="startTest()">开始测试</button>
+                <button class="btn" onclick="startTest()">开始抽取题目并测试</button>
             </div>
 
-            <!-- 测试页面 -->
             <div class="test-screen" id="testScreen">
                 <div class="timer-bar">
-                    <div class="timer">
-                        <span class="timer-icon">⏱️</span>
-                        <span>剩余时间：</span>
-                        <span class="timer-text" id="timer">30:00</span>
-                    </div>
+                    <div class="timer">⏱️ 剩余时间 <span class="timer-text" id="timer">30:00</span></div>
                 </div>
-
                 <div class="test-container">
-                    <div class="progress-section">
-                        <div class="progress-info">
-                            <span class="progress-label">答题进度：<span class="progress-value" id="questionProgress">1/70</span></span>
-                            <span class="progress-label">已完成：<span class="progress-value" id="answeredCount">0题</span></span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="progressFill"></div>
-                        </div>
+                    <div class="progress-info">
+                        <span>进度: <strong id="questionProgress" style="color:var(--primary-color)">1/70</strong></span>
+                        <span>已答: <strong id="answeredCount">0</strong> 题</span>
                     </div>
-
+                    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                    
                     <div class="question-card" id="questionCard">
-                        <!-- 题目将动态加载 -->
-                    </div>
-
+                        </div>
+                    
                     <div class="navigation">
-                        <button class="btn btn-secondary" onclick="previousQuestion()" id="prevBtn">
-                            ← 上一题
-                        </button>
-                        <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn">
-                            下一题 →
-                        </button>
+                        <button class="btn btn-secondary" onclick="previousQuestion()" id="prevBtn">← 上一题</button>
+                        <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn">下一题 →</button>
                     </div>
                 </div>
             </div>
 
-            <!-- 结果页面 -->
             <div class="result-screen" id="resultScreen">
                 <div class="result-header">
-                    <div class="result-title">✅ 测试完成</div>
-                    <div class="result-subtitle">感谢您完成本次综合能力评估</div>
+                    <div class="result-title">✅ 测试已完成</div>
+                    <p style="color:var(--text-gray); margin-top:10px;">测试数据已自动加密留存，供政工及纪检干部研判。</p>
                 </div>
 
-                <div class="score-card">
-                    <div>综合得分</div>
-                    <div class="score-display">
-                        <span id="totalScore">0</span><span class="score-suffix">分</span>
+                <div id="alertContainer"></div>
+
+                <div class="dimension-card">
+                    <div class="dimension-header">
+                        <div class="dimension-name">🧠 职业性格倾向 (MBTI)</div>
+                        <div class="dimension-score" id="mbtiResultTitle">计算中...</div>
                     </div>
-                    <div class="result-level" id="resultLevel">评估中...</div>
-                    <div class="result-description" id="resultDescription"></div>
+                    <div class="mbti-chart" id="mbtiChartContainer">
+                        </div>
+                    <div class="mbti-desc" id="mbtiDesc"></div>
                 </div>
 
-                <div class="dimensions-section">
-                    <div class="section-title">各维度测评结果</div>
-                    <div id="dimensionAnalysis"></div>
+                <div class="dimension-card">
+                    <div class="dimension-header">
+                        <div class="dimension-name">🛡️ 纪律与服从性评估</div>
+                        <div class="dimension-score" id="disciplineScore">0分</div>
+                    </div>
+                    <p style="font-size:14px; color:#6c757d;">该项得分反映考生在半军事化管理下的服从意识和规矩意识。</p>
                 </div>
 
-                <div class="action-buttons">
-                    <button class="btn" onclick="downloadResult()">📥 下载测试报告</button>
+                <div class="dimension-card">
+                    <div class="dimension-header">
+                        <div class="dimension-name">🧮 基础抗压与算数能力</div>
+                        <div class="dimension-score" id="mathScore">0/10 正确</div>
+                    </div>
                 </div>
-                
-                <div class="info-notice">
-                    <p>⚠️ 测试结果已自动保存，如需重新测试请刷新页面</p>
-                    <p>📌 为确保测试公平性，每次测试仅可提交一次</p>
-                </div>
+
+                <button class="btn" style="margin-top: 30px;" onclick="downloadResult()">📥 下载完整测评报告 (TXT)</button>
             </div>
         </div>
     </div>
 
     <script>
-        // 测试题库（优化为60道心理题 + 10道算数题）
-        const questions = [
-            // 情绪稳定性维度 (1-10题)
-            { id: 1, text: "我经常会感到紧张、焦虑或不安", dimension: "情绪稳定性", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 2, 1] },
-            { id: 2, text: "当遇到突发状况时,我能保持冷静", dimension: "情绪稳定性", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 3, text: "遇到挫折时,我容易感到失落、沮丧", dimension: "情绪稳定性", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 2, 1] },
-            { id: 4, text: "我能够很好地控制自己的情绪", dimension: "情绪稳定性", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 5, text: "我常常因为小事而烦躁、生气", dimension: "情绪稳定性", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 2, 1] },
-            { id: 6, text: "我能够快速从不愉快的经历中恢复过来", dimension: "情绪稳定性", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 7, text: "我经常会无缘无故地感到心情低落", dimension: "情绪稳定性", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 2, 1] },
-            { id: 8, text: "生气时,我能够控制自己的言行", dimension: "情绪稳定性", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 9, text: "我对生活和工作持积极乐观的态度", dimension: "情绪稳定性", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 10, text: "面对困难时,我能够保持积极的心态", dimension: "情绪稳定性", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
+        // ==========================================
+        // 核心题库 (系统将从中精确抽取 70 题)
+        // ==========================================
+        const questionPool = [
+            // --- 测谎维度 (5题) ---
+            { id: 101, text: "我从小到大从来没有对任何人撒过一次谎。", category: "lie_scale", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [0, 0, 0, 1, 1] },
+            { id: 102, text: "我从未在背后议论过别人的任何缺点。", category: "lie_scale", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [0, 0, 0, 1, 1] },
+            { id: 103, text: "我犯了错总是立刻承认，绝对不会找哪怕一次借口。", category: "lie_scale", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [0, 0, 0, 1, 1] },
+            { id: 104, text: "我即使遇到极其不公平的对待，也从未产生过生气的念头。", category: "lie_scale", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [0, 0, 0, 1, 1] },
+            { id: 105, text: "我答应别人的事情，不管遇到多大不可抗力，百分之百都会做到。", category: "lie_scale", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [0, 0, 0, 1, 1] },
 
-            // 压力应对能力维度 (11-20题)
-            { id: 11, text: "紧急情况下,我能够快速做出正确决策", dimension: "压力应对", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 12, text: "工作压力让我感到难以承受", dimension: "压力应对", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 2, 1] },
-            { id: 13, text: "我有自己的方法来缓解压力", dimension: "压力应对", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 14, text: "压力会严重影响我的睡眠质量", dimension: "压力应对", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 2, 1] },
-            { id: 15, text: "在高压环境下,我依然能够保持专注", dimension: "压力应对", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 16, text: "我善于合理安排时间,避免过度压力", dimension: "压力应对", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 17, text: "压力让我难以集中注意力", dimension: "压力应对", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 2, 1] },
-            { id: 18, text: "即使在压力下,我也能保持高效工作", dimension: "压力应对", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 19, text: "我能够将压力转化为工作动力", dimension: "压力应对", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 20, text: "我能够冷静分析压力来源并解决问题", dimension: "压力应对", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
+            // --- 红线排查：冲动/抑郁/创伤 (15题，反向计分，0分为触发红线) ---
+            { id: 201, text: "当别人强烈反对我的意见时，我会忍不住想要动手或大声斥责。", category: "redline_impulse", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 1, 0] },
+            { id: 202, text: "在极度疲惫或压力大的时候，我会有想要破坏身边物品的强烈冲动。", category: "redline_impulse", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 1, 0] },
+            { id: 203, text: "我曾因为无法控制脾气，导致严重的肢体冲突。", category: "redline_impulse", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 1, 0] },
+            { id: 204, text: "如果有人当众羞辱我，我一定会当场以暴力手段报复回去。", category: "redline_impulse", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 1, 0] },
+            { id: 205, text: "开车或骑车时如果被人加塞，我会立刻加速追上去别停对方。", category: "redline_impulse", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 1, 0] },
+            { id: 206, text: "我经常觉得活着没什么意思，对很多事情提不起兴趣。", category: "redline_depress", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 1, 0] },
+            { id: 207, text: "最近几个月，我经常整夜失眠，脑子里总是想消极的事情。", category: "redline_depress", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 1, 0] },
+            { id: 208, text: "我常常觉得自己是个彻底的失败者，一无是处。", category: "redline_depress", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 1, 0] },
+            { id: 209, text: "遇到一点小挫折，我就觉得天塌下来了，很久无法恢复。", category: "redline_depress", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 1, 0] },
+            { id: 210, text: "我曾经有过想要结束自己生命的念头。", category: "redline_depress", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 1, 0] },
+            { id: 211, text: "看到尖锐的物品或血液，我会感到生理上的极度恶心或心慌甚至晕厥。", category: "redline_trauma", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 1, 0] },
+            { id: 212, text: "看灾难电影中的伤亡画面时，我会产生强烈的真实恐慌感，好几天睡不好。", category: "redline_trauma", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 1, 0] },
+            { id: 213, text: "处于黑暗狭小的密闭空间里，我会瞬间崩溃，无法呼吸。", category: "redline_trauma", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 1, 0] },
+            { id: 214, text: "站在三层楼高的地方往下看，我会双腿发软完全无法移动。", category: "redline_trauma", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 1, 0] },
+            { id: 215, text: "听到突如其来的巨大警报声，我会吓得无法做出任何思考和动作。", category: "redline_trauma", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 1, 0] },
 
-            // 团队协作能力维度 (21-30题)
-            { id: 21, text: "我喜欢与他人一起合作完成任务", dimension: "团队协作", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 22, text: "我更喜欢独自工作,而不是团队合作", dimension: "团队协作", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 2, 1] },
-            { id: 23, text: "我能够与性格各异的人有效合作", dimension: "团队协作", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 24, text: "我愿意倾听并认真考虑他人的意见", dimension: "团队协作", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 25, text: "我认为自己的想法总是最好的", dimension: "团队协作", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 2, 1] },
-            { id: 26, text: "为了团队目标,我愿意作出个人牺牲", dimension: "团队协作", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 27, text: "我会主动帮助有困难的团队成员", dimension: "团队协作", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 28, text: "我善于在团队中进行沟通和协调", dimension: "团队协作", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 29, text: "我能够尊重和接纳团队中的不同意见", dimension: "团队协作", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 30, text: "团队取得成功时,我会感到由衷的喜悦", dimension: "团队协作", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
+            // --- 纪律与服从性 (10题) ---
+            { id: 301, text: "如果我认为指挥员的某个常规指令不够高效，我会：", category: "discipline", type: "psychology", options: ["立即提出质疑并按自己的方式做", "先坚决执行指令，事后私下提建议", "假装没听清，按自己的经验办"], scores: [1, 5, 0] },
+            { id: 302, text: "休息时间临时接到紧急归队通知，但您正准备和家人看电影：", category: "discipline", type: "psychology", options: ["立刻动身归队", "看完电影再回去", "找借口说在外地赶不回"], scores: [5, 1, 0] },
+            { id: 303, text: "对于队里制定的繁琐内务规定（如叠被子、物品摆放）：", category: "discipline", type: "psychology", options: ["纯属形式主义，毫无意义", "虽然繁琐，但能培养纪律意识，坚决遵守", "无所谓，应付检查就行"], scores: [1, 5, 2] },
+            { id: 304, text: "在队站里，上级安排了一项你非常不喜欢且超出日常范围的杂活：", category: "discipline", type: "psychology", options: ["直接拒绝，表示这不是我的工作", "毫无怨言地接受并尽快完成", "嘴上答应，但故意拖延或做得很差"], scores: [1, 5, 0] },
+            { id: 305, text: "外出请假时间到了，但聚会还没结束：", category: "discipline", type: "psychology", options: ["必须按时销假，提前离开聚会", "晚回去一两个小时没关系", "让战友帮忙打掩护"], scores: [5, 1, 0] },
+            { id: 306, text: "对“绝对服从”这四个字的理解：", category: "discipline", type: "psychology", options: ["这是一种落后的管理理念", "在消防这支纪律队伍中，这是战斗力的保障", "视情况而定，有道理才服从"], scores: [1, 5, 2] },
+            { id: 307, text: "发现战友私自违规使用违禁电器，你会：", category: "discipline", type: "psychology", options: ["当没看见，多一事不如少一事", "立刻制止并要求收起，不听则上报", "自己也跟着一起用"], scores: [2, 5, 0] },
+            { id: 308, text: "考核时，由于考官疏忽多给你记了分数：", category: "discipline", type: "psychology", options: ["暗自庆幸，不声张", "主动向考官说明情况，要求更正", "告诉好朋友炫耀一下"], scores: [1, 5, 0] },
+            { id: 309, text: "因为工作失误受到队领导的严厉批评：", category: "discipline", type: "psychology", options: ["当场顶撞反驳", "立正接受批评，事后认真反思整改", "表面接受，心里记恨"], scores: [0, 5, 1] },
+            { id: 310, text: "在集体活动中，个人的安排与集体要求发生冲突：", category: "discipline", type: "psychology", options: ["以个人安排为重", "无条件服从集体要求", "大吵大闹要求集体让步"], scores: [1, 5, 0] },
 
-            // 责任心维度 (31-40题)
-            { id: 31, text: "我总是认真完成分配给我的每一项任务", dimension: "责任心", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 32, text: "我经常会拖延重要的工作", dimension: "责任心", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 2, 1] },
-            { id: 33, text: "我对自己的工作质量要求很高", dimension: "责任心", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 34, text: "我会为自己的行为和决定负责", dimension: "责任心", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 35, text: "出现问题时,我倾向于把责任推给别人", dimension: "责任心", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 2, 1] },
-            { id: 36, text: "我做事有计划、有条理", dimension: "责任心", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 37, text: "我能够按时完成答应别人的事情", dimension: "责任心", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 38, text: "完成任务后,我会仔细检查自己的工作", dimension: "责任心", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 39, text: "即使任务很困难,我也会坚持完成", dimension: "责任心", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 40, text: "我对工作质量有严格的标准", dimension: "责任心", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
+            // --- MBTI 维度 (30题) ---
+            // E/I (8题)
+            { id: 401, text: "经过一天高强度的灭火救援任务后，你更倾向于：", category: "mbti_ei", type: "mbti", options: ["找个安静的地方自己待一会儿，睡一觉或听听歌", "和战友们聚在一起聊天、吃宵夜释放压力"], values: ["I", "E"] },
+            { id: 402, text: "在陌生的环境中，你通常是：", category: "mbti_ei", type: "mbti", options: ["主动和周围人搭话，迅速融入", "默默观察，等别人先开口"], values: ["E", "I"] },
+            { id: 403, text: "周末休息时，你最理想的放松方式是：", category: "mbti_ei", type: "mbti", options: ["参加热闹的聚会或集体运动", "宅在宿舍看书、刷剧或独自玩游戏"], values: ["E", "I"] },
+            { id: 404, text: "在讨论会上，你倾向于：", category: "mbti_ei", type: "mbti", options: ["边想边说，经常第一个发言", "在心里反复斟酌完善后，再进行发言"], values: ["E", "I"] },
+            { id: 405, text: "你的交友风格更偏向于：", category: "mbti_ei", type: "mbti", options: ["朋友很多，喜欢结交各种新朋友", "朋友不多，但都是交心的挚友"], values: ["E", "I"] },
+            { id: 406, text: "遇到烦心事，你通常怎么解决：", category: "mbti_ei", type: "mbti", options: ["找人倾诉，把事情说出来就舒服了", "自己默默消化，理清思绪"], values: ["E", "I"] },
+            { id: 407, text: "如果要完成一项复杂的任务，你更喜欢：", category: "mbti_ei", type: "mbti", options: ["和大家一起头脑风暴，分工合作", "一个人独立承担，不受打扰地完成"], values: ["E", "I"] },
+            { id: 408, text: "你对周围发生的突发小事件的第一反应：", category: "mbti_ei", type: "mbti", options: ["立刻上前凑热闹或参与进去", "站在一旁冷静观察"], values: ["E", "I"] },
+            
+            // S/N (8题)
+            { id: 409, text: "在学习新的消防器材操作时，你更喜欢：", category: "mbti_sn", type: "mbti", options: ["按照操作手册一步一步地学习具体步骤", "先了解这个器材的整体设计原理和最终目的"], values: ["S", "N"] },
+            { id: 410, text: "描述一场火灾时，你更倾向于：", category: "mbti_sn", type: "mbti", options: ["描述火势大小、燃烧物质、具体的过火面积等细节", "描述现场给人带来的压迫感、可能的起火原因推测"], values: ["S", "N"] },
+            { id: 411, text: "你更欣赏哪种类型的人：", category: "mbti_sn", type: "mbti", options: ["脚踏实地，注重现实和实用性的人", "充满想象力，经常有创新点子的人"], values: ["S", "N"] },
+            { id: 412, text: "面对一个复杂问题，你习惯于：", category: "mbti_sn", type: "mbti", options: ["依赖过往的实际经验来寻找现成解决方案", "跳出框架，寻找一种前所未有的新方法"], values: ["S", "N"] },
+            { id: 413, text: "你平时说话的方式更偏向于：", category: "mbti_sn", type: "mbti", options: ["直接具体，有一说一", "喜欢打比方，使用隐喻和概念词"], values: ["S", "N"] },
+            { id: 414, text: "当你阅读一份报告时，你最看重：", category: "mbti_sn", type: "mbti", options: ["里面详实的数据和具体的案例", "报告所揭示的未来趋势和深层含义"], values: ["S", "N"] },
+            { id: 415, text: "你认为什么更能说服你：", category: "mbti_sn", type: "mbti", options: ["确凿的证据和客观事实", "严密的推理和宏大的逻辑推想"], values: ["S", "N"] },
+            { id: 416, text: "在做计划时，你倾向于：", category: "mbti_sn", type: "mbti", options: ["关注当下的具体步骤和可行性", "着眼于长远的目标和未来的可能性"], values: ["S", "N"] },
 
-            // 适应能力维度 (41-50题)
-            { id: 41, text: "我能够快速适应新的工作环境", dimension: "适应能力", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 42, text: "我不喜欢改变,抗拒新事物", dimension: "适应能力", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 2, 1] },
-            { id: 43, text: "我能够根据情况灵活调整工作方式", dimension: "适应能力", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 44, text: "面对工作变化时,我会感到不安和焦虑", dimension: "适应能力", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 2, 1] },
-            { id: 45, text: "我喜欢尝试新的工作方法和技能", dimension: "适应能力", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 46, text: "我能够接受临时、突发的工作安排", dimension: "适应能力", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 47, text: "我能够在不同的岗位之间快速切换", dimension: "适应能力", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 48, text: "我善于快速学习新的知识和技能", dimension: "适应能力", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 49, text: "我能够应对各种不同类型的工作挑战", dimension: "适应能力", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 50, text: "我喜欢接受新的挑战和任务", dimension: "适应能力", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
+            // T/F (7题)
+            { id: 417, text: "如果队里两位战友因为分工不均发生争吵，你去调解时会：", category: "mbti_tf", type: "mbti", options: ["帮他们分析对错，拿出客观公平的排班制度来解决", "先安抚双方的情绪，关注他们的感受，再慢慢讲道理"], values: ["T", "F"] },
+            { id: 418, text: "你认为一个优秀的指挥员，最重要的是：", category: "mbti_tf", type: "mbti", options: ["冷静客观的判断力和绝对的公平", "极强的同理心和对队员的关怀"], values: ["T", "F"] },
+            { id: 419, text: "在评价一名队员的表现时，你认为哪个更关键：", category: "mbti_tf", type: "mbti", options: ["他是否达到了既定的考核标准", "他是否付出了足够的努力并取得了进步"], values: ["T", "F"] },
+            { id: 420, text: "当需要做出一个艰难的决定时，你主要依靠：", category: "mbti_tf", type: "mbti", options: ["逻辑分析和利弊权衡", "内心的价值观和对他人感受的顾及"], values: ["T", "F"] },
+            { id: 421, text: "你觉得自己更像是一个：", category: "mbti_tf", type: "mbti", options: ["讲道理、重逻辑的思考者", "重感情、讲情义的性情中人"], values: ["T", "F"] },
+            { id: 422, text: "如果在工作中发现制度有不近人情的地方，你会：", category: "mbti_tf", type: "mbti", options: ["制度就是制度，必须严格执行", "视情况灵活变通，多照顾一下个人感受"], values: ["T", "F"] },
+            { id: 423, text: "受到批评时，你更在意的是：", category: "mbti_tf", type: "mbti", options: ["批评的内容是否客观真实", "对方批评时的态度和语气"], values: ["T", "F"] },
 
-            // 自我认知维度 (51-60题)
-            { id: 51, text: "我很清楚自己的优点和缺点", dimension: "自我认知", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 52, text: "我对自己缺乏真正的了解", dimension: "自我认知", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 2, 1] },
-            { id: 53, text: "我能够客观地评价自己的工作表现", dimension: "自我认知", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 54, text: "我了解自己在不同情况下的情绪反应", dimension: "自我认知", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 55, text: "我经常不明白自己为什么会这样做", dimension: "自我认知", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 2, 1] },
-            { id: 56, text: "我有明确的职业发展目标和规划", dimension: "自我认知", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 57, text: "我能够虚心接受他人的批评和建议", dimension: "自我认知", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 58, text: "我很难接受自己有缺点和不足", dimension: "自我认知", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [5, 4, 3, 2, 1] },
-            { id: 59, text: "我知道什么样的工作适合自己", dimension: "自我认知", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-            { id: 60, text: "我相信自己能够胜任消防员这份工作", dimension: "自我认知", type: "psychology", options: ["完全不符合", "不太符合", "不确定", "比较符合", "完全符合"], scores: [1, 2, 3, 4, 5] },
-
-            // 基础算数能力 (61-70题)
-            { id: 61, question: "15 + 27 = ?", dimension: "基础算数", type: "math", answer: 42, options: ["40", "41", "42", "43", "44"] },
-            { id: 62, question: "56 - 29 = ?", dimension: "基础算数", type: "math", answer: 27, options: ["25", "26", "27", "28", "29"] },
-            { id: 63, question: "8 × 9 = ?", dimension: "基础算数", type: "math", answer: 72, options: ["63", "70", "72", "81", "90"] },
-            { id: 64, question: "144 ÷ 12 = ?", dimension: "基础算数", type: "math", answer: 12, options: ["10", "11", "12", "13", "14"] },
-            { id: 65, question: "35 + 48 - 19 = ?", dimension: "基础算数", type: "math", answer: 64, options: ["62", "63", "64", "65", "66"] },
-            { id: 66, question: "6 × 7 + 8 = ?", dimension: "基础算数", type: "math", answer: 50, options: ["48", "49", "50", "51", "52"] },
-            { id: 67, question: "100 - 36 + 15 = ?", dimension: "基础算数", type: "math", answer: 79, options: ["77", "78", "79", "80", "81"] },
-            { id: 68, question: "18 × 3 ÷ 6 = ?", dimension: "基础算数", type: "math", answer: 9, options: ["7", "8", "9", "10", "11"] },
-            { id: 69, question: "250 ÷ 5 - 20 = ?", dimension: "基础算数", type: "math", answer: 30, options: ["28", "29", "30", "31", "32"] },
-            { id: 70, question: "45 + 36 - 27 + 18 = ?", dimension: "基础算数", type: "math", answer: 72, options: ["70", "71", "72", "73", "74"] }
+            // J/P (7题)
+            { id: 424, text: "面对即将到来的一次大型演练，你更喜欢：", category: "mbti_jp", type: "mbti", options: ["提前一周制定好每天的训练计划并严格执行", "有个大体目标就行，根据每天的状态灵活调整"], values: ["J", "P"] },
+            { id: 425, text: "在日常生活中，你的储物柜通常是：", category: "mbti_jp", type: "mbti", options: ["物品分类清晰，每样东西都有固定的位置", "东西比较随意摆放，只要自己能找到就行"], values: ["J", "P"] },
+            { id: 426, text: "对于“时间观念”，你的态度是：", category: "mbti_jp", type: "mbti", options: ["准时是底线，非常讨厌迟到或计划被打乱", "比较随性，迟到一会儿或者临时改变安排也能接受"], values: ["J", "P"] },
+            { id: 427, text: "在执行任务前，你更希望：", category: "mbti_jp", type: "mbti", options: ["把所有细节都确定下来，心中有数", "保留一定的开放性，随机应变"], values: ["J", "P"] },
+            { id: 428, text: "你的工作状态更像：", category: "mbti_jp", type: "mbti", options: ["先紧后松，尽快完成任务后再安心休息", "踩着截止日期完成，在压力下爆发灵感"], values: ["J", "P"] },
+            { id: 429, text: "你更喜欢哪种生活方式：", category: "mbti_jp", type: "mbti", options: ["井井有条，按部就班", "充满惊喜，自由自在"], values: ["J", "P"] },
+            { id: 430, text: "做完一个决定后，你通常会：", category: "mbti_jp", type: "mbti", options: ["不再纠结，立刻着手执行", "总是忍不住想，如果选另一个会不会更好"], values: ["J", "P"] }
         ];
 
+        // --- 基础算数题库 (10题) ---
+        const mathPool = [
+            { id: 901, question: "15 + 27 = ?", category: "math", type: "math", answer: 42, options: ["40", "41", "42", "43", "44"] },
+            { id: 902, question: "56 - 29 = ?", category: "math", type: "math", answer: 27, options: ["25", "26", "27", "28", "29"] },
+            { id: 903, question: "8 × 9 = ?", category: "math", type: "math", answer: 72, options: ["63", "70", "72", "81", "90"] },
+            { id: 904, question: "144 ÷ 12 = ?", category: "math", type: "math", answer: 12, options: ["10", "11", "12", "13", "14"] },
+            { id: 905, question: "35 + 48 - 19 = ?", category: "math", type: "math", answer: 64, options: ["62", "63", "64", "65", "66"] },
+            { id: 906, question: "6 × 7 + 8 = ?", category: "math", type: "math", answer: 50, options: ["48", "49", "50", "51", "52"] },
+            { id: 907, question: "100 - 36 + 15 = ?", category: "math", type: "math", answer: 79, options: ["77", "78", "79", "80", "81"] },
+            { id: 908, question: "18 × 3 ÷ 6 = ?", category: "math", type: "math", answer: 9, options: ["7", "8", "9", "10", "11"] },
+            { id: 909, question: "250 ÷ 5 - 20 = ?", category: "math", type: "math", answer: 30, options: ["28", "29", "30", "31", "32"] },
+            { id: 910, question: "45 + 36 - 27 + 18 = ?", category: "math", type: "math", answer: 72, options: ["70", "71", "72", "73", "74"] }
+        ];
+
+        let questions = []; 
         let currentQuestion = 0;
-        let answers = new Array(70).fill(null);
-        let timeLeft = 30 * 60; // 30分钟
+        let answers = [];
+        let timeLeft = 30 * 60;
         let timerInterval;
-        let startTime;
         let candidateInfo = {};
-        let testSubmitted = false;
-        let testResults = null;
+        let finalReportData = {};
+
+        // 洗牌算法
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // 抽取70题
+        function generateTestQuestions() {
+            const lies = shuffleArray(questionPool.filter(q => q.category === 'lie_scale')).slice(0, 5);
+            const redlines = shuffleArray(questionPool.filter(q => q.category.startsWith('redline_'))).slice(0, 15);
+            const disciplines = shuffleArray(questionPool.filter(q => q.category === 'discipline')).slice(0, 10);
+            const mbtis = shuffleArray(questionPool.filter(q => q.type === 'mbti')).slice(0, 30);
+            
+            // 混合所有心理题，防止看出规律
+            let psychQuestions = shuffleArray([...lies, ...redlines, ...disciplines, ...mbtis]);
+            let maths = shuffleArray(mathPool).slice(0, 10);
+            
+            return [...psychQuestions, ...maths];
+        }
 
         function startTest() {
             const name = document.getElementById('candidateName').value.trim();
@@ -929,49 +369,17 @@
             const id = document.getElementById('candidateId').value.trim();
             const phone = document.getElementById('candidatePhone').value.trim();
 
-            if (!name || !gender || !id || !phone) {
-                alert('请填写完整的个人信息！');
-                return;
-            }
-
-            if (!/^\d{18}$/.test(id) && !/^\d{17}[0-9X]$/.test(id)) {
-                alert('请输入正确的18位身份证号！');
-                return;
-            }
-
-            if (!/^1[3-9]\d{9}$/.test(phone)) {
-                alert('请输入正确的11位手机号码！');
-                return;
-            }
-
-            // 检查该身份证是否已有测试记录
-            try {
-                const existingResult = localStorage.getItem('firefighterTestResult_' + id);
-                if (existingResult) {
-                    const confirmed = confirm(
-                        '⚠️ 检测到该身份证号已有测试记录！\n\n' +
-                        '为确保测试公平性，每个身份证号只能测试一次。\n\n' +
-                        '如需查看之前的测试结果，请联系管理员。\n' +
-                        '如确需重新测试，请点击"确定"继续（将覆盖原记录）。'
-                    );
-                    
-                    if (!confirmed) {
-                        return;
-                    }
-                    
-                    localStorage.removeItem('firefighterTestResult_' + id);
-                    console.log('🗑️ 已删除旧测试记录，准备开始新测试');
-                }
-            } catch (e) {
-                console.warn('⚠️ 无法检查本地存储:', e);
-            }
+            if (!name || !id || !phone) return alert('请填写完整的个人信息！');
+            if (!/^\d{17}[\dXx]$/.test(id)) return alert('请输入正确的18位身份证号！');
+            if (!/^1[3-9]\d{9}$/.test(phone)) return alert('请输入正确的手机号码！');
 
             candidateInfo = { name, gender, id, phone };
+            questions = generateTestQuestions();
+            answers = new Array(questions.length).fill(null);
 
             document.getElementById('welcomeScreen').classList.remove('active');
             document.getElementById('testScreen').classList.add('active');
 
-            startTime = new Date();
             startTimer();
             displayQuestion();
         }
@@ -981,406 +389,203 @@
                 timeLeft--;
                 const minutes = Math.floor(timeLeft / 60);
                 const seconds = timeLeft % 60;
-                document.getElementById('timer').textContent = 
-                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    alert('测试时间已到，系统将自动提交！');
-                    submitTest();
-                }
-
-                if (timeLeft === 300) {
-                    alert('⚠️ 注意：还剩5分钟，请抓紧时间！');
-                }
-
-                if (timeLeft === 60) {
-                    alert('⚠️ 注意：还剩1分钟！');
+                    alert('时间到，系统将自动交卷！');
+                    calculateResults();
                 }
             }, 1000);
         }
 
         function displayQuestion() {
-            const question = questions[currentQuestion];
-            const questionCard = document.getElementById('questionCard');
+            const q = questions[currentQuestion];
+            const qc = document.getElementById('questionCard');
+            
+            let badgeHtml = '';
+            if (q.type === 'mbti') badgeHtml = '<div class="mbti-badge">职业性格测试</div>';
+            else if (q.type === 'math') badgeHtml = '<div class="dimension-badge" style="background:#d0ebff;color:#1971c2">基础算数</div>';
+            else if (q.category === 'discipline') badgeHtml = '<div class="dimension-badge" style="background:#d3f9d8;color:#2b8a3e">纪律服从性</div>';
+            else badgeHtml = '<div class="dimension-badge">心理与抗压能力</div>';
 
-            if (question.type === 'psychology') {
-                // 心理测试题
-                questionCard.innerHTML = `
-                    <div class="question-header">
-                        <div class="question-number">第 ${currentQuestion + 1} 题</div>
-                        <div class="dimension-badge">${question.dimension}</div>
-                    </div>
-                    <div class="question-text">${question.text}</div>
-                    <div class="options-container">
-                        ${question.options.map((option, index) => `
-                            <div class="option ${answers[currentQuestion] === index ? 'selected' : ''}" 
-                                 onclick="selectOption(${index})">
-                                <input type="radio" class="option-radio" name="q${currentQuestion}" 
-                                       id="q${currentQuestion}_${index}" 
-                                       ${answers[currentQuestion] === index ? 'checked' : ''}>
-                                <label class="option-label" for="q${currentQuestion}_${index}">${option}</label>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            } else {
-                // 算数题
-                questionCard.innerHTML = `
-                    <div class="question-header">
-                        <div class="question-number">第 ${currentQuestion + 1} 题</div>
-                        <div class="math-badge">基础算数</div>
-                    </div>
-                    <div class="math-question">${question.question}</div>
-                    <div class="options-container">
-                        ${question.options.map((option, index) => `
-                            <div class="option ${answers[currentQuestion] === index ? 'selected' : ''}" 
-                                 onclick="selectOption(${index})">
-                                <input type="radio" class="option-radio" name="q${currentQuestion}" 
-                                       id="q${currentQuestion}_${index}" 
-                                       ${answers[currentQuestion] === index ? 'checked' : ''}>
-                                <label class="option-label" for="q${currentQuestion}_${index}">${option}</label>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
-
-            updateProgress();
-            updateNavButtons();
+            qc.innerHTML = `
+                <div class="question-header">
+                    <div class="question-number">第 ${currentQuestion + 1} 题</div>
+                    ${badgeHtml}
+                </div>
+                <div class="${q.type === 'math' ? 'math-question' : 'question-text'}">
+                    ${q.text || q.question}
+                </div>
+                <div class="options-container">
+                    ${q.options.map((opt, idx) => `
+                        <div class="option ${answers[currentQuestion] === idx ? 'selected' : ''}" onclick="selectOption(${idx})">
+                            <input type="radio" class="option-radio" ${answers[currentQuestion] === idx ? 'checked' : ''}>
+                            <label class="option-label">${opt}</label>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            document.getElementById('questionProgress').textContent = `${currentQuestion + 1}/70`;
+            document.getElementById('progressFill').style.width = ((currentQuestion + 1) / 70 * 100) + '%';
+            document.getElementById('answeredCount').textContent = answers.filter(a => a !== null).length;
+            
+            document.getElementById('prevBtn').disabled = currentQuestion === 0;
+            document.getElementById('nextBtn').textContent = currentQuestion === 69 ? '提交试卷 ✓' : '下一题 →';
         }
 
-        function selectOption(optionIndex) {
-            answers[currentQuestion] = optionIndex;
+        function selectOption(idx) {
+            answers[currentQuestion] = idx;
             displayQuestion();
         }
 
-        function updateProgress() {
-            const progress = ((currentQuestion + 1) / questions.length) * 100;
-            document.getElementById('progressFill').style.width = progress + '%';
-            document.getElementById('questionProgress').textContent = `${currentQuestion + 1}/70`;
-            
-            const answeredCount = answers.filter(a => a !== null).length;
-            document.getElementById('answeredCount').textContent = answeredCount + '题';
-        }
-
-        function updateNavButtons() {
-            document.getElementById('prevBtn').disabled = currentQuestion === 0;
-            const nextBtn = document.getElementById('nextBtn');
-            if (currentQuestion === questions.length - 1) {
-                nextBtn.textContent = '提交测试 ✓';
-                nextBtn.classList.add('btn-submit');
-            } else {
-                nextBtn.textContent = '下一题 →';
-                nextBtn.classList.remove('btn-submit');
-            }
-        }
-
         function previousQuestion() {
-            if (currentQuestion > 0) {
-                currentQuestion--;
-                displayQuestion();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+            if (currentQuestion > 0) { currentQuestion--; displayQuestion(); }
         }
 
         function nextQuestion() {
-            if (currentQuestion === questions.length - 1) {
-                const unanswered = answers.filter(a => a === null).length;
-                if (unanswered > 0) {
-                    if (confirm(`还有 ${unanswered} 题未作答，确定要提交吗？\n\n未作答的题目将按默认值计算。`)) {
-                        submitTest();
-                    }
+            if (currentQuestion === 69) {
+                let unans = answers.filter(a => a === null).length;
+                if(unans > 0) {
+                    if(!confirm(`还有 ${unans} 题未作答，未作答将严重影响结果精度。确定要强行提交吗？`)) return;
                 } else {
-                    if (confirm('确认提交测试吗？提交后将无法修改答案。')) {
-                        submitTest();
-                    }
+                    if(!confirm('确定提交试卷吗？')) return;
                 }
+                clearInterval(timerInterval);
+                calculateResults();
             } else {
                 currentQuestion++;
                 displayQuestion();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
-        }
-
-        function submitTest() {
-            if (testSubmitted) {
-                alert('测试已提交，请勿重复提交！');
-                return;
-            }
-
-            testSubmitted = true;
-            clearInterval(timerInterval);
-            calculateResults();
         }
 
         function calculateResults() {
-            const dimensions = {
-                '情绪稳定性': [],
-                '压力应对': [],
-                '团队协作': [],
-                '责任心': [],
-                '适应能力': [],
-                '自我认知': [],
-                '基础算数': []
-            };
+            let mathCorrect = 0, lieScore = 0, redlineTriggers = 0, disciplineScore = 0, maxDiscipline = 0;
+            let mbti = { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 };
 
-            let totalScore = 0;
-            let mathCorrect = 0;
+            questions.forEach((q, idx) => {
+                let ans = answers[idx];
+                if (ans === null) return;
 
-            questions.forEach((question, index) => {
-                if (question.type === 'psychology') {
-                    let score;
-                    if (answers[index] !== null) {
-                        score = question.scores[answers[index]];
-                    } else {
-                        score = 3; // 未答题默认中间值
+                if (q.type === 'psychology') {
+                    let score = q.scores[ans];
+                    if (q.category === 'lie_scale') lieScore += score;
+                    if (q.category.startsWith('redline_') && score === 0) redlineTriggers++;
+                    if (q.category === 'discipline') {
+                        disciplineScore += score;
+                        maxDiscipline += 5;
                     }
-                    totalScore += score;
-                    dimensions[question.dimension].push(score);
-                } else {
-                    // 算数题
-                    if (answers[index] !== null && parseInt(question.options[answers[index]]) === question.answer) {
-                        mathCorrect++;
-                        totalScore += 5;
-                        dimensions['基础算数'].push(5);
-                    } else {
-                        dimensions['基础算数'].push(0);
-                    }
+                } else if (q.type === 'mbti') {
+                    mbti[q.values[ans]]++;
+                } else if (q.type === 'math') {
+                    if (parseInt(q.options[ans]) === q.answer) mathCorrect++;
                 }
             });
 
-            const dimensionScores = {};
-            for (let dim in dimensions) {
-                const scores = dimensions[dim];
-                if (dim === '基础算数') {
-                    dimensionScores[dim] = (mathCorrect / 10 * 100).toFixed(1);
-                } else {
-                    const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
-                    dimensionScores[dim] = (avgScore / 5 * 100).toFixed(1);
-                }
-            }
+            let finalMBTI = 
+                (mbti.E >= mbti.I ? 'E' : 'I') +
+                (mbti.S >= mbti.N ? 'S' : 'N') +
+                (mbti.T >= mbti.F ? 'T' : 'F') +
+                (mbti.J >= mbti.P ? 'J' : 'P');
 
-            displayResults(totalScore, dimensionScores, mathCorrect);
+            finalReportData = { mathCorrect, lieScore, redlineTriggers, disciplineScore, mbtiResult: finalMBTI, mbtiCounts: mbti };
+            renderResultScreen(finalReportData);
         }
 
-        function displayResults(totalScore, dimensionScores, mathCorrect) {
+        function renderResultScreen(data) {
             document.getElementById('testScreen').classList.remove('active');
             document.getElementById('resultScreen').classList.add('active');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            // 心理测试总分300分，算数测试50分，总计350分
-            const maxScore = 350;
-            const percentage = (totalScore / maxScore * 100).toFixed(1);
-            document.getElementById('totalScore').textContent = percentage;
-
-            let level, description, color;
-            if (percentage >= 85) {
-                level = '优秀 ⭐⭐⭐⭐⭐';
-                description = '您的综合素质优秀，心理健康状况良好，基础算数能力扎实，完全具备消防员岗位要求。';
-                color = '#06d6a0';
-            } else if (percentage >= 75) {
-                level = '良好 ⭐⭐⭐⭐';
-                description = '您的综合素质良好，各项能力均衡发展，符合消防员岗位要求。';
-                color = '#2a9d8f';
-            } else if (percentage >= 65) {
-                level = '合格 ⭐⭐⭐';
-                description = '您的综合素质基本合格，但在某些方面还有提升空间，建议加强相关训练。';
-                color = '#ffd166';
-            } else if (percentage >= 50) {
-                level = '需改善 ⭐⭐';
-                description = '您的综合素质需要改善，建议针对性地提升心理素质和基础能力。';
-                color = '#ef476f';
-            } else {
-                level = '不合格 ⭐';
-                description = '您的综合素质暂时未达到消防员岗位要求，建议加强训练后再次参加测试。';
-                color = '#e63946';
+            let alertHtml = '';
+            if (data.redlineTriggers > 0) {
+                alertHtml += `<div class="danger-box">🔴 <strong>红色预警：</strong> 检测到考生在情绪极化或创伤维度存在 ${data.redlineTriggers} 项高危倾向。建议政工干部介入谈心或安排专业复检。</div>`;
             }
+            if (data.lieScore >= 3) {
+                alertHtml += `<div class="warning-box">🟡 <strong>有效性预警：</strong> 测谎维度得分过高（${data.lieScore}分），考生存在强烈的“完美掩饰”倾向，测评结果可信度降低。</div>`;
+            }
+            document.getElementById('alertContainer').innerHTML = alertHtml;
 
-            document.getElementById('resultLevel').textContent = level;
-            document.getElementById('resultLevel').style.color = color;
-            document.getElementById('resultDescription').textContent = description;
-
-            const dimensionAnalysisHtml = Object.entries(dimensionScores)
-                .map(([dim, score]) => {
-                    let dimColor = score >= 85 ? '#06d6a0' : score >= 75 ? '#2a9d8f' : score >= 65 ? '#ffd166' : '#ef476f';
-                    return `
-                        <div class="dimension-card">
-                            <div class="dimension-header">
-                                <div class="dimension-name">${dim}${dim === '基础算数' ? '（' + mathCorrect + '/10 正确）' : ''}</div>
-                                <div class="dimension-score">${score}分</div>
-                            </div>
-                            <div class="dimension-bar-container">
-                                <div class="dimension-bar-fill" style="width: 0%; background: linear-gradient(90deg, ${dimColor}, ${dimColor}dd);" data-width="${score}%">
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-            document.getElementById('dimensionAnalysis').innerHTML = dimensionAnalysisHtml;
-
-            setTimeout(() => {
-                document.querySelectorAll('.dimension-bar-fill').forEach(el => {
-                    const width = el.dataset.width;
-                    el.style.width = width;
-                });
-            }, 200);
-
-            // 保存测试结果
-            const endTime = new Date();
-            const duration = Math.floor((endTime - startTime) / 1000 / 60);
-            
-            testResults = {
-                candidateInfo: candidateInfo,
-                testInfo: {
-                    testDate: new Date().toLocaleDateString('zh-CN', {year: 'numeric', month: '2-digit', day: '2-digit'}),
-                    testTime: new Date().toLocaleTimeString('zh-CN'),
-                    duration: duration,
-                    completedQuestions: answers.filter(a => a !== null).length
-                },
-                scores: {
-                    totalScore: totalScore,
-                    percentage: percentage,
-                    level: level,
-                    description: description,
-                    dimensions: dimensionScores,
-                    mathCorrect: mathCorrect
-                },
-                answers: answers.map((answer, index) => {
-                    const q = questions[index];
-                    return {
-                        questionId: index + 1,
-                        answer: answer !== null ? answer : (q.type === 'psychology' ? 2 : null),
-                        dimension: q.dimension,
-                        type: q.type
-                    };
-                })
+            // 渲染 MBTI 条形图
+            const mc = data.mbtiCounts;
+            const createBar = (lLabel, rLabel, lVal, rVal) => {
+                let total = lVal + rVal || 1; 
+                let lPct = (lVal / total * 100).toFixed(0);
+                let rPct = (rVal / total * 100).toFixed(0);
+                return `
+                <div class="mbti-row">
+                    <span class="mbti-label">${lLabel}</span>
+                    <div class="mbti-bar-container">
+                        <div class="mbti-bar-left" style="width: ${lPct}%">${lPct}%</div>
+                        <div class="mbti-bar-right" style="width: ${rPct}%">${rPct}%</div>
+                    </div>
+                    <span class="mbti-label">${rLabel}</span>
+                </div>`;
             };
 
-            try {
-                localStorage.setItem('firefighterTestResult_' + candidateInfo.id, JSON.stringify(testResults));
-                console.log('✅ 测试结果已保存到本地存储');
-            } catch (e) {
-                console.warn('⚠️ 本地存储失败:', e);
-            }
+            document.getElementById('mbtiChartContainer').innerHTML = 
+                createBar('外向(E)', '内向(I)', mc.E, mc.I) +
+                createBar('实感(S)', '直觉(N)', mc.S, mc.N) +
+                createBar('思考(T)', '情感(F)', mc.T, mc.F) +
+                createBar('判断(J)', '感知(P)', mc.J, mc.P);
 
-            saveToBackend(testResults);
+            document.getElementById('mbtiResultTitle').textContent = `${data.mbtiResult} 型`;
+            document.getElementById('mbtiDesc').innerHTML = `<strong>职业画像建议：</strong>${getMbtiDescription(data.mbtiResult)}`;
+            
+            document.getElementById('disciplineScore').textContent = `${data.disciplineScore} 分 (满分50)`;
+            document.getElementById('mathScore').textContent = `${data.mathCorrect} / 10 题`;
         }
 
-        function saveToBackend(data) {
-            console.log('📊 测试结果数据（可对接后台API）:', data);
-            console.log('💾 数据已保存到本地存储，键名:', 'firefighterTestResult_' + data.candidateInfo.id);
+        function getMbtiDescription(type) {
+            const desc = {
+                "ESTJ": "管家型：极其重视纪律和规则，执行力极强，非常适合部队的半军事化管理，是优秀的骨干苗子。",
+                "ISTJ": "物流师型：踏实肯干，一丝不苟，服从命令，是队伍中最值得信赖的基石。",
+                "ESTP": "企业家型：胆大心细，反应极快，在突发火场和救援一线往往能发挥出色的破局能力。",
+                "ISFJ": "守卫者型：默默奉献，极具责任感，非常照顾战友，能极大提升班组的凝聚力。",
+                "ENTJ": "指挥官型：具有天生的领导力，善于发现系统漏洞并进行优化，适合承担战术指挥工作。",
+                "ISFP": "探险家型：灵活且善于观察细节，在需要精细操作的救援任务中表现出色。"
+            };
+            return desc[type] || "该性格具备独特的优势，适应性较强。建议在日常带兵中结合实际表现，进一步发掘其潜力。";
         }
 
         function downloadResult() {
-            if (!testResults) {
-                alert('❌ 测试结果数据不存在，请重新测试！');
-                return;
-            }
-
-            const reportContent = `
+            const r = finalReportData;
+            const content = `
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        忠县消防救援大队政府专职消防员招录
-          心理健康与基础能力测试报告
+      忠县消防救援大队心理与职业性格评估报告
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【人员档案】
+姓名：${candidateInfo.name} | 性别：${candidateInfo.gender}
+身份证：${candidateInfo.id}
+电话：${candidateInfo.phone}
 
-【考生信息】
-  姓    名：${testResults.candidateInfo.name}
-  性    别：${testResults.candidateInfo.gender}
-  身份证号：${testResults.candidateInfo.id}
-  联系电话：${testResults.candidateInfo.phone}
+【风险排查(政工专核)】
+掩饰性预警：${r.lieScore >= 3 ? `存在高掩饰倾向 (${r.lieScore}分)` : '正常'}
+红线项触发：${r.redlineTriggers} 项 ${r.redlineTriggers > 0 ? '(⚠️需介入评估)' : '(安全)'}
+纪律服从得分：${r.disciplineScore} 分
 
-【测试信息】
-  测试日期：${testResults.testInfo.testDate}
-  测试时间：${testResults.testInfo.testTime}
-  测试时长：${testResults.testInfo.duration} 分钟
-  完成题数：${testResults.testInfo.completedQuestions} / 70 题
+【职业性格画像】
+测试结果：${r.mbtiResult} 型
+倾向占比：
+E(外向):${r.mbtiCounts.E} vs I(内向):${r.mbtiCounts.I}
+S(实感):${r.mbtiCounts.S} vs N(直觉):${r.mbtiCounts.N}
+T(思考):${r.mbtiCounts.T} vs F(情感):${r.mbtiCounts.F}
+J(判断):${r.mbtiCounts.J} vs P(感知):${r.mbtiCounts.P}
 
+【基础能力】
+抗压算数正确率：${r.mathCorrect * 10}%
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-【测试结果】
-  综合得分：${testResults.scores.percentage} 分
-  评估等级：${testResults.scores.level}
-
-【评估说明】
-  ${testResults.scores.description}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-【各维度得分详情】
-${Object.entries(testResults.scores.dimensions).map(([dim, score]) => {
-    if (dim === '基础算数') {
-        return `  ${dim}：${score}分（${testResults.scores.mathCorrect}/10题正确）`;
-    }
-    return `  ${dim}：${score}分`;
-}).join('\n')}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-【评分标准说明】
-  优秀（85-100分）：综合素质全面优秀
-  良好（75-84分） ：综合素质均衡良好
-  合格（65-74分） ：基本达标，有提升空间
-  需改善（50-64分）：需针对性训练
-  不合格（<50分）：未达到岗位要求
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-【答题详情】（仅供管理员参考）
-${testResults.answers.map(item => {
-    const question = questions[item.questionId - 1];
-    if (question.type === 'psychology') {
-        const answerText = item.answer !== null && item.answer !== 2 
-            ? question.options[item.answer] 
-            : '未作答（默认：不确定）';
-        return `题${item.questionId}（${item.dimension}）：${answerText}`;
-    } else {
-        const answerText = item.answer !== null ? question.options[item.answer] : '未作答';
-        const isCorrect = item.answer !== null && parseInt(question.options[item.answer]) === question.answer;
-        return `题${item.questionId}（${item.dimension}）：${answerText} ${isCorrect ? '✓' : '✗'}`;
-    }
-}).join('\n')}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-本报告仅供参考，最终解释权归忠县消防救援大队所有。
-
-报告编号：${testResults.candidateInfo.id}_${new Date().getTime()}
-报告生成时间：${new Date().toLocaleString('zh-CN')}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            `;
-
-            const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+生成时间：${new Date().toLocaleString()}
+系统：消防人员量化管理辅助模块
+`;
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `消防员综合测试报告_${testResults.candidateInfo.name}_${testResults.candidateInfo.id}.txt`;
+            a.download = `测评报告_${candidateInfo.name}_${candidateInfo.id.slice(-4)}.txt`;
             a.click();
             URL.revokeObjectURL(url);
-
-            alert('✅ 报告下载成功！\n\n报告包含完整答题详情和算数题正误，请妥善保管。');
         }
-
-        window.addEventListener('beforeunload', function (e) {
-            if (document.getElementById('testScreen').classList.contains('active')) {
-                e.preventDefault();
-                e.returnValue = '测试尚未完成，确定要离开吗？';
-            }
-        });
-
-        window.addEventListener('load', function() {
-            if (testSubmitted) {
-                console.log('⚠️ 检测到已提交的测试，禁止重新答题');
-            }
-        });
-
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('keydown', e => {
-            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J'))) {
-                e.preventDefault();
-            }
-        });
     </script>
 </body>
 </html>
